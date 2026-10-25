@@ -1,0 +1,363 @@
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const chatArea = $("#chatArea");
+  const promptBox = $("#prompt");
+  const sendBtn = $("#sendBtn");
+  const WELCOME = $("#welcome");
+  const SUGGESTIONS = $("#suggestions");
+  const STORAGE_KEY = "pqai_chats_v1";
+
+  let mode = "chat";
+  let imageMode = false;
+  let busy = false;
+  let activeId = null;
+  let chats = loadChats();
+  let messages = [];
+
+  function loadChats() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  function saveChats() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+    } catch {}
+    renderHistory();
+  }
+
+  function newId() {
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  }
+
+  function titleFor(text) {
+    return text.replace(/\s+/g, " ").slice(0, 32) || "새 대화";
+  }
+
+  function setMode(next) {
+    mode = next;
+    imageMode = next === "image";
+
+    document.querySelectorAll("[data-mode]").forEach(el => {
+      el.classList.toggle("active", el.dataset.mode === next);
+    });
+
+    $("#topTitle").textContent = ({
+      chat: "AI와 대화",
+      learn: "지식 탐색",
+      code: "코딩 도우미",
+      write: "글쓰기 & 번역",
+      image: "이미지 만들기"
+    })[next] || "AI와 대화";
+
+    promptBox.placeholder = imageMode
+      ? "만들고 싶은 이미지를 자세히 설명해 주세요..."
+      : ({
+          learn: "무엇을 배우고 싶으신가요?",
+          code: "만들거나 수정하고 싶은 코드를 설명해 주세요...",
+          write: "작성하거나 번역할 내용을 입력해 주세요..."
+        })[next] || "PQAI에게 무엇이든 물어보세요...";
+
+    $("#webSearch").checked = next === "learn";
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[c]);
+  }
+
+  function formatText(text) {
+    let safe = esc(text);
+
+    safe = safe.replace(
+      /```([\w+-]*)\n([\s\S]*?)```/g,
+      (_, lang, code) => `<pre><code>${code}</code></pre>`
+    );
+
+    safe = safe.replace(/`([^`\n]+)`/g, "<code>$1</code>");
+    safe = safe.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    safe = safe.replace(/^### (.+)$/gm, "<h3>$1</h3>");
+    safe = safe.replace(/^## (.+)$/gm, "<h2>$1</h2>");
+    safe = safe.replace(/^# (.+)$/gm, "<h1>$1</h1>");
+    safe = safe.replace(/^\s*[-*] (.+)$/gm, "• $1");
+
+    return safe.split(/\n{2,}/).map(part =>
+      part.startsWith("<pre>") || /^<h[1-3]>/.test(part)
+        ? part
+        : `<p>${part.replace(/\n/g, "<br>")}</p>`
+    ).join("");
+  }
+
+  function addMessage(role, content, extra = {}) {
+    messages.push({ role, content });
+
+    const el = document.createElement("div");
+    el.className = `message ${role === "user" ? "user" : "assistant"}`;
+
+    const avatar = document.createElement("div");
+    avatar.className = "msg-avatar";
+    avatar.textContent = role === "user" ? "나" : "PQ";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.innerHTML = role === "assistant"
+      ? formatText(content)
+      : esc(content).replace(/\n/g, "<br>");
+
+    if (extra.image) {
+      const img = document.createElement("img");
+      img.className = "image-result";
+      img.src = extra.image;
+      img.alt = "PQAI 이미지";
+      bubble.appendChild(img);
+
+      const link = document.createElement("a");
+      link.className = "download-link";
+      link.href = extra.image;
+      link.download = "pqai-image.png";
+      link.textContent = "이미지 저장";
+      bubble.appendChild(link);
+    }
+
+    el.append(avatar, bubble);
+    chatArea.appendChild(el);
+    scrollToBottom();
+    return bubble;
+  }
+
+  function showTyping() {
+    const el = document.createElement("div");
+    el.className = "message";
+    el.id = "typing";
+    el.innerHTML =
+      '<div class="msg-avatar">PQ</div>' +
+      '<div class="bubble"><div class="typing">' +
+      '<i></i><i></i><i></i></div></div>';
+
+    chatArea.appendChild(el);
+    scrollToBottom();
+  }
+
+  function scrollToBottom() {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: "smooth"
+    });
+  }
+
+  function renderHistory() {
+    const host = $("#historyList");
+    host.innerHTML = "";
+
+    chats.slice().reverse().slice(0, 12).forEach(chat => {
+      const b = document.createElement("button");
+      b.className = "history-item";
+      b.textContent = chat.title;
+      b.title = chat.title;
+      b.onclick = () => openChat(chat.id);
+      host.appendChild(b);
+    });
+  }
+
+  function persistCurrent() {
+    if (!messages.length) return;
+
+    const first =
+      messages.find(m => m.role === "user")?.content || "새 대화";
+
+    const i = chats.findIndex(c => c.id === activeId);
+
+    const item = {
+      id: activeId || newId(),
+      title: titleFor(first),
+      messages: messages.slice(-60),
+      updated: Date.now()
+    };
+
+    activeId = item.id;
+
+    if (i >= 0) chats[i] = item;
+    else chats.push(item);
+
+    chats.sort((a, b) => b.updated - a.updated);
+    chats = chats.slice(0, 40);
+    saveChats();
+  }
+
+  function openChat(id) {
+    const item = chats.find(c => c.id === id);
+    if (!item) return;
+
+    activeId = item.id;
+    messages = item.messages || [];
+    chatArea.innerHTML = "";
+
+    messages.forEach(m => addMessage(m.role, m.content));
+
+    WELCOME.style.display = "none";
+    SUGGESTIONS.style.display = "none";
+    setMode("chat");
+  }
+
+  function resetChat() {
+    activeId = newId();
+    messages = [];
+    chatArea.innerHTML = "";
+    WELCOME.style.display = "";
+    SUGGESTIONS.style.display = "";
+    setMode("chat");
+    promptBox.value = "";
+    promptBox.focus();
+  }
+
+  async function send(textOverride) {
+    const text = (textOverride ?? promptBox.value).trim();
+    if (!text || busy) return;
+
+    promptBox.value = "";
+    promptBox.style.height = "auto";
+    WELCOME.style.display = "none";
+    SUGGESTIONS.style.display = "none";
+
+    addMessage("user", text);
+    busy = true;
+    sendBtn.disabled = true;
+    showTyping();
+
+    try {
+      if (imageMode) {
+        const r = await fetch("/api/image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: text })
+        });
+
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || "이미지 생성 실패");
+
+        $("#typing")?.remove();
+
+        const el = document.createElement("div");
+        el.className = "message assistant";
+
+        const avatar = document.createElement("div");
+        avatar.className = "msg-avatar";
+        avatar.textContent = "PQ";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+
+        const p = document.createElement("p");
+        p.textContent = data.message || "이미지 미리보기를 만들었어요.";
+        bubble.appendChild(p);
+
+        const img = document.createElement("img");
+        img.className = "image-result";
+        img.src = data.image;
+        img.alt = "PQAI 이미지 미리보기";
+        bubble.appendChild(img);
+
+        const link = document.createElement("a");
+        link.className = "download-link";
+        link.href = data.image;
+        link.download = "pqai-image.png";
+        link.textContent = "이미지 저장";
+        bubble.appendChild(link);
+
+        el.append(avatar, bubble);
+        chatArea.appendChild(el);
+
+        messages.push({
+          role: "assistant",
+          content: p.textContent
+        });
+      } else {
+        const apiMessages = messages
+          .filter(m => m.role === "user" || m.role === "assistant")
+          .slice(-24);
+
+        // 서버가 message 필드를 읽으므로 text도 함께 전달합니다.
+        const r = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: text,
+            messages: apiMessages,
+            mode,
+            webSearch: $("#webSearch").checked
+          })
+        });
+
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || "AI 응답 실패");
+
+        $("#typing")?.remove();
+
+        // 새 서버는 reply, 기존 서버는 text를 반환할 수 있습니다.
+        addMessage(
+          "assistant",
+          data.reply || data.text || "응답을 받지 못했습니다."
+        );
+      }
+
+      persistCurrent();
+    } catch (err) {
+      $("#typing")?.remove();
+
+      addMessage(
+        "assistant",
+        `오류가 발생했어요.\n\n${err.message}\n\n` +
+        "서버가 실행 중인지 확인해 주세요."
+      );
+    } finally {
+      busy = false;
+      sendBtn.disabled = false;
+      promptBox.focus();
+    }
+  }
+
+  sendBtn.addEventListener("click", () => send());
+
+  promptBox.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  });
+
+  promptBox.addEventListener("input", () => {
+    promptBox.style.height = "auto";
+    promptBox.style.height =
+      Math.min(promptBox.scrollHeight, 170) + "px";
+  });
+
+  $("#newChat").addEventListener("click", resetChat);
+
+  document.querySelectorAll(".nav-item[data-mode], .mode[data-mode]")
+    .forEach(b => {
+      b.addEventListener("click", () => setMode(b.dataset.mode));
+    });
+
+  $("#imageMode").addEventListener("click", () => setMode("image"));
+
+  document.querySelectorAll(".suggestion").forEach(b => {
+    b.addEventListener("click", () => {
+      setMode(b.dataset.mode);
+      send(b.dataset.prompt);
+    });
+  });
+
+  renderHistory();
+  activeId = newId();
+})();
+</script>

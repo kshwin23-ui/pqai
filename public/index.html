@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="PQAI — 질문하고, 배우고, 만들고, 탐색하는 나만의 AI">
+  <title>PQAI — 나만의 AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#f7f8fc;--surface:#fff;--ink:#20243a;--muted:#85899d;--line:#e9ebf3;--purple:#6657e8;--purple2:#8b7cff;--soft:#f0edff;--shadow:0 14px 40px rgba(36,32,91,.07)}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans","Noto Sans KR",sans-serif;min-height:100vh}
+    button,input,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #bcb4ff;outline-offset:2px}
+    .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}.sidebar{background:#fff;border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:22px}
+    .brand{display:flex;align-items:center;gap:11px;padding:0 8px}.logo{width:39px;height:39px;border-radius:14px;background:linear-gradient(135deg,#7467f0,#a89eff);display:grid;place-items:center;color:white;font-weight:800;font-size:17px;box-shadow:0 7px 18px #7769ef40}.brand-name{font-weight:800;letter-spacing:-.7px;font-size:22px}.brand-sub{font-size:11px;color:var(--muted);margin-top:1px}
+    .new-chat{display:flex;align-items:center;justify-content:center;gap:9px;border:0;border-radius:13px;padding:13px;background:var(--purple);color:#fff;font-weight:700;box-shadow:0 8px 16px #6657e82b}.nav-label{font-size:11px;font-weight:700;letter-spacing:1.1px;color:#a1a4b5;padding:0 10px;margin-bottom:8px}.nav-item{display:flex;align-items:center;gap:12px;width:100%;border:0;background:transparent;color:#6d7187;text-align:left;padding:11px 12px;border-radius:11px;margin:2px 0;font-size:14px}.nav-item:hover,.nav-item.active{background:var(--soft);color:var(--purple);font-weight:700}.nav-item svg{width:18px;height:18px;flex-shrink:0}.history{display:flex;flex-direction:column;gap:3px;overflow:auto;max-height:35vh}.history-item{border:0;background:transparent;color:#777b90;text-align:left;padding:9px 11px;border-radius:9px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.history-item:hover{background:#f5f4fc}.sidebar-bottom{margin-top:auto;border-top:1px solid var(--line);padding:17px 8px 0;color:#999db0;font-size:11px;line-height:1.7}
+    main{min-width:0;display:flex;flex-direction:column;min-height:100vh}.topbar{height:76px;display:flex;align-items:center;justify-content:space-between;padding:0 34px;border-bottom:1px solid #eceef5;background:#ffffffc9;backdrop-filter:blur(16px)}.top-title{font-size:14px;font-weight:700}.status{display:flex;align-items:center;gap:7px;color:#73778b;font-size:12px}.dot{width:7px;height:7px;border-radius:50%;background:#50c99a}.avatar{width:34px;height:34px;border-radius:12px;background:#f0edff;color:var(--purple);display:grid;place-items:center;font-weight:800}
+    .main-inner{width:min(920px,100%);margin:0 auto;padding:42px 28px 26px;flex:1;display:flex;flex-direction:column}.welcome{text-align:center;padding:30px 0 26px}.eyebrow{display:inline-flex;align-items:center;gap:7px;background:#efedff;color:var(--purple);border:1px solid #e5e0ff;border-radius:100px;padding:7px 12px;font-size:11px;font-weight:700;letter-spacing:.3px}.welcome h1{font-size:clamp(30px,4vw,43px);line-height:1.25;letter-spacing:-1.8px;margin:20px 0 12px;font-weight:800}.gradient{background:linear-gradient(100deg,#6657e8,#b35cce);-webkit-background-clip:text;background-clip:text;color:transparent}.welcome p{margin:0;color:#85899d;font-size:14px;line-height:1.8}
+    .suggestions{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:12px 0 28px}.suggestion{border:1px solid var(--line);background:#fff;border-radius:16px;padding:16px 14px;text-align:left;min-height:123px;transition:.18s;box-shadow:0 4px 15px #2a2b5010}.suggestion:hover{transform:translateY(-3px);border-color:#c9c1ff;box-shadow:var(--shadow)}.suggestion .s-icon{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;margin-bottom:12px}.s-icon svg{width:18px;height:18px}.s-purple{background:#efedff;color:#6858e8}.s-blue{background:#e8f3ff;color:#398be5}.s-peach{background:#fff0e8;color:#e88751}.s-green{background:#e7f9f1;color:#31a87c}.suggestion strong{display:block;font-size:13px;margin-bottom:5px}.suggestion span{font-size:11px;line-height:1.5;color:#9094a7}
+    .chat-area{flex:1;display:flex;flex-direction:column;gap:20px;padding-bottom:18px}.message{display:flex;gap:12px;align-items:flex-start;animation:fade .2s ease}.message.user{flex-direction:row-reverse}.msg-avatar{flex:0 0 34px;height:34px;border-radius:12px;background:#efedff;color:var(--purple);display:grid;place-items:center;font-size:12px;font-weight:800}.message.user .msg-avatar{background:#e8ebf4;color:#555b70}.bubble{max-width:min(760px,calc(100% - 46px));background:#fff;border:1px solid var(--line);border-radius:4px 17px 17px 17px;padding:15px 18px;font-size:14px;line-height:1.85;overflow-wrap:anywhere;box-shadow:0 4px 14px #292c4c08}.message.user .bubble{background:#6a5be8;color:#fff;border-color:#6a5be8;border-radius:17px 4px 17px 17px;white-space:pre-wrap}.bubble p{margin:0 0 10px}.bubble p:last-child{margin-bottom:0}.bubble pre{overflow:auto;background:#202338;color:#eef0ff;border-radius:11px;padding:14px;font-size:12px}.bubble code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f0eff8;border-radius:4px;padding:2px 4px;font-size:.92em}.bubble pre code{background:transparent;padding:0}.bubble ul,.bubble ol{padding-left:22px}.bubble a{color:#6556e7}.bubble img{max-width:100%;border-radius:12px}.typing{display:flex;gap:5px;padding:5px 0}.typing i{width:6px;height:6px;border-radius:50%;background:#8d82ed;animation:bounce 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+    .composer-wrap{position:sticky;bottom:0;background:linear-gradient(180deg,#f7f8fc00,#f7f8fc 18%);padding:16px 0 0}.mode-row{display:flex;align-items:center;gap:7px;margin:0 0 10px;flex-wrap:wrap}.mode{border:1px solid #e5e6f0;border-radius:100px;background:#fff;padding:7px 11px;color:#777b90;font-size:11px}.mode.active{background:#efedff;border-color:#d9d2ff;color:#6657e8;font-weight:700}.search-toggle{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;color:#7b7f94}.search-toggle input{accent-color:var(--purple)}.composer{background:#fff;border:1px solid #e3e5ef;border-radius:20px;padding:12px;box-shadow:0 10px 35px #292c4c0c;display:flex;align-items:flex-end;gap:10px}.composer:focus-within{border-color:#c7c0ff;box-shadow:0 0 0 4px #7768ed10}.composer textarea{resize:none;border:0;outline:none;flex:1;min-height:40px;max-height:170px;padding:10px 5px;color:var(--ink);font-size:14px;line-height:1.6;background:transparent}.composer textarea::placeholder{color:#a1a4b5}.send-btn{height:42px;width:44px;flex-shrink:0;border:0;border-radius:13px;background:var(--purple);color:white;display:grid;place-items:center}.send-btn:disabled{opacity:.45;cursor:not-allowed}.send-btn svg{width:18px;height:18px}.composer-foot{display:flex;justify-content:space-between;color:#a2a5b6;font-size:10px;padding:10px 6px 0}.mobile-brand{display:none}.image-result{display:block;margin-top:12px;width:min(100%,520px);border-radius:15px;border:1px solid var(--line)}.download-link{display:inline-block;margin-top:8px;color:var(--purple);font-size:12px}
+    @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:900px){.app{grid-template-columns:220px 1fr}.suggestions{grid-template-columns:repeat(2,1fr)}.topbar{padding:0 22px}.main-inner{padding:28px 20px 22px}}
+    @media(max-width:650px){.app{grid-template-columns:1fr}.sidebar{display:none}.topbar{height:62px;padding:0 16px}.mobile-brand{display:flex;align-items:center;gap:8px}.mobile-brand .logo{width:31px;height:31px;border-radius:10px;font-size:13px}.mobile-brand .brand-name{font-size:19px}.top-title{display:none}.main-inner{padding:22px 14px 18px}.welcome{padding:20px 0}.welcome h1{letter-spacing:-1px}.welcome p{font-size:12px}.suggestions{gap:9px;margin:12px 0 20px}.suggestion{padding:13px 12px;min-height:113px}.suggestion strong{font-size:12px}.suggestion span{font-size:10px}.mode-row{gap:5px}.mode{padding:7px 9px}.search-toggle{margin-left:0}.composer{border-radius:17px}.composer-foot{font-size:9px}.status{font-size:10px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">PQ</div><div><div class="brand-name">PQAI</div><div class="brand-sub">YOUR AI COMPANION</div></div></div>
+    <button class="new-chat" id="newChat"><span>＋</span> 새 대화 시작</button>
+    <div>
+      <div class="nav-label">WORKSPACE</div>
+      <button class="nav-item active" data-mode="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.5 8.5 0 0 1-9 8.5 9.5 9.5 0 0 1-4-.9L3 21l1.9-4.5A8.5 8.5 0 1 1 21 11.5Z"/></svg>AI와 대화</button>
+      <button class="nav-item" data-mode="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3H21v16H5.5A2.5 2.5 0 0 0 3 21.5z"/><path d="M3 5.5v16M7 7h10M7 11h8"/></svg>지식 탐색</button>
+      <button class="nav-item" data-mode="code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 8-5 4 5 4M16 8l5 4-5 4M14 4l-4 16"/></svg>코딩 도우미</button>
+      <button class="nav-item" data-mode="write"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>글쓰기 & 번역</button>
+      <button class="nav-item" id="imageMode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>이미지 만들기</button>
+    </div>
+    <div><div class="nav-label">RECENT CHATS</div><div class="history" id="historyList"></div></div>
+    <div class="sidebar-bottom">PQAI · 나만의 AI 워크스페이스<br>AI 답변은 틀릴 수 있으니 중요한 정보는 확인하세요.</div>
+  </aside>
+  <main>
+    <header class="topbar">
+      <div class="mobile-brand"><div class="logo">PQ</div><div class="brand-name">PQAI</div></div>
+      <div class="top-title" id="topTitle">AI와 대화</div>
+      <div style="display:flex;align-items:center;gap:14px"><div class="status"><span class="dot"></span><span id="statusText">AI 워크스페이스</span></div><div class="avatar">P</div></div>
+    </header>
+    <div class="main-inner">
+      <section class="welcome" id="welcome">
+        <div class="eyebrow"><span>✦</span> YOUR PERSONAL AI</div>
+        <h1>무엇이든 물어보세요,<br><span class="gradient">가능성은 무한하니까.</span></h1>
+        <p>질문하고, 배우고, 만들고, 새로운 아이디어를 발견하세요.<br>PQAI가 당신의 생각을 현실로 만드는 걸 도와드릴게요.</p>
+      </section>
+      <section class="suggestions" id="suggestions">
+        <button class="suggestion" data-prompt="인공지능이 작동하는 원리를 중학생도 이해할 수 있게 설명해 줘." data-mode="learn"><div class="s-icon s-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1m-8.6 8.6-2.1 2.1"/><circle cx="12" cy="12" r="5"/></svg></div><strong>새로운 지식 배우기</strong><span>어려운 개념도 쉽게 이해하기</span></button>
+        <button class="suggestion" data-prompt="초보자도 실행할 수 있는 할 일 목록 웹앱을 HTML, CSS, JavaScript로 만들어 줘." data-mode="code"><div class="s-icon s-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 8-5 4 5 4m8-8 5 4-5 4M14 4l-4 16"/></svg></div><strong>코드 만들기</strong><span>아이디어를 실제 코드로</span></button>
+        <button class="suggestion" data-prompt="친구에게 보낼 생일 축하 메시지를 따뜻하고 센스 있게 3가지 써 줘." data-mode="write"><div class="s-icon s-peach"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></div><strong>글쓰기 도우미</strong><span>표현을 더 멋지게 다듬기</span></button>
+        <button class="suggestion" data-prompt="밤하늘 아래 미래적인 도시를 그린 디지털 아트. 보라색과 파란색 네온, 시네마틱한 조명, 디테일한 일러스트." data-mode="image"><div class="s-icon s-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div><strong>이미지 생성하기</strong><span>상상하는 장면을 그림으로</span></button>
+      </section>
+      <section class="chat-area" id="chatArea" aria-live="polite"></section>
+      <div class="composer-wrap">
+        <div class="mode-row">
+          <button class="mode active" data-mode="chat">✦ 대화</button>
+          <button class="mode" data-mode="learn">⌕ 지식 탐색</button>
+          <button class="mode" data-mode="code">⌘ 코딩</button>
+          <button class="mode" data-mode="write">✎ 글쓰기</button>
+          <label class="search-toggle"><input type="checkbox" id="webSearch"> 웹 검색 사용</label>
+        </div>
+        <div class="composer">
+          <textarea id="prompt" rows="1" placeholder="PQAI에게 무엇이든 물어보세요..."></textarea>
+          <button class="send-btn" id="sendBtn" aria-label="보내기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 14-7-4 14-3-6-7-1Z"/><path d="m12 13 7-8"/></svg></button>
+        </div>
+        <div class="composer-foot"><span>Enter로 전송 · Shift + Enter로 줄 바꿈</span><span>AI는 실수할 수 있습니다.</span></div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const chatArea = $("#chatArea"), promptBox = $("#prompt"), sendBtn = $("#sendBtn");
+  const WELCOME = $("#welcome"), SUGGESTIONS = $("#suggestions");
+  const STORAGE_KEY = "pqai_chats_v1";
+  let mode = "chat", imageMode = false, busy = false, activeId = null;
+  let chats = loadChats(), messages = [];
+
+  function loadChats(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; } }
+  function saveChats(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(chats)); } catch {} renderHistory(); }
+  function newId(){ return `${Date.now()}-${Math.random().toString(36).slice(2,8)}`; }
+  function titleFor(text){ return text.replace(/\s+/g," ").slice(0,32) || "새 대화"; }
+  function setMode(next){
+    mode = next; imageMode = next === "image";
+    document.querySelectorAll("[data-mode]").forEach(el => el.classList.toggle("active", el.dataset.mode === next));
+    $("#topTitle").textContent = ({chat:"AI와 대화",learn:"지식 탐색",code:"코딩 도우미",write:"글쓰기 & 번역",image:"이미지 만들기"})[next] || "AI와 대화";
+    promptBox.placeholder = imageMode ? "만들고 싶은 이미지를 자세히 설명해 주세요..." : ({learn:"무엇을 배우고 싶으신가요? 최신 정보는 웹 검색을 켜세요.",code:"만들거나 수정하고 싶은 코드를 설명해 주세요...",write:"작성하거나 번역할 내용을 입력해 주세요..."})[next] || "PQAI에게 무엇이든 물어보세요...";
+    $("#webSearch").checked = next === "learn";
+  }
+  function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+  function formatText(text){
+    // Small safe Markdown subset: code, fenced blocks, lists, headings, links and paragraphs.
+    let safe = esc(text);
+    safe = safe.replace(/```([\w+-]*)\n([\s\S]*?)```/g,(_,lang,code)=>`<pre><code>${code}</code></pre>`);
+    safe = safe.replace(/`([^`\n]+)`/g,"<code>$1</code>");
+    safe = safe.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+    safe = safe.replace(/^### (.+)$/gm,"<h3>$1</h3>").replace(/^## (.+)$/gm,"<h2>$1</h2>").replace(/^# (.+)$/gm,"<h1>$1</h1>");
+    safe = safe.replace(/^\s*[-*] (.+)$/gm,"• $1");
+    return safe.split(/\n{2,}/).map(part=>part.startsWith("<pre>")||/^<h[1-3]>/.test(part)?part:`<p>${part.replace(/\n/g,"<br>")}</p>`).join("");
+  }
+  function addMessage(role, content, extra={}){
+    messages.push({role,content});
+    const el = document.createElement("div"); el.className = `message ${role === "user" ? "user" : "assistant"}`;
+    const avatar = document.createElement("div"); avatar.className="msg-avatar"; avatar.textContent=role==="user"?"나":"PQ";
+    const bubble=document.createElement("div"); bubble.className="bubble";
+    bubble.innerHTML = role==="assistant" ? formatText(content) : esc(content).replace(/\n/g,"<br>");
+    if(extra.image){
+      const img=document.createElement("img");img.className="image-result";img.src=extra.image;img.alt="PQAI 생성 이미지";bubble.appendChild(img);
+      const link=document.createElement("a");link.className="download-link";link.href=extra.image;link.download="pqai-image.png";link.textContent="이미지 저장";bubble.appendChild(link);
+    }
+    el.append(avatar,bubble);chatArea.appendChild(el);scrollToBottom();return bubble;
+  }
+  function showTyping(){
+    const el=document.createElement("div");el.className="message";el.id="typing";
+    el.innerHTML='<div class="msg-avatar">PQ</div><div class="bubble"><div class="typing"><i></i><i></i><i></i></div></div>';
+    chatArea.appendChild(el);scrollToBottom();
+  }
+  function scrollToBottom(){ window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"}); }
+  function renderHistory(){
+    const host=$("#historyList");host.innerHTML="";
+    chats.slice().reverse().slice(0,12).forEach(chat=>{
+      const b=document.createElement("button");b.className="history-item";b.textContent=chat.title;b.title=chat.title;
+      b.onclick=()=>openChat(chat.id);host.appendChild(b);
+    });
+  }
+  function persistCurrent(){
+    if(!messages.length)return;
+    const first=messages.find(m=>m.role==="user")?.content || "새 대화";
+    const i=chats.findIndex(c=>c.id===activeId);
+    const item={id:activeId||newId(),title:titleFor(first),messages:messages.slice(-60),updated:Date.now()};
+    activeId=item.id;
+    if(i>=0)chats[i]=item;else chats.push(item);
+    chats.sort((a,b)=>b.updated-a.updated);chats=chats.slice(0,40);saveChats();
+  }
+  function openChat(id){
+    const item=chats.find(c=>c.id===id);if(!item)return;
+    activeId=item.id;messages=item.messages||[];chatArea.innerHTML="";
+    messages.forEach(m=>addMessage(m.role,m.content));
+    WELCOME.style.display="none";SUGGESTIONS.style.display="none";setMode("chat");
+  }
+  function resetChat(){
+    activeId=newId();messages=[];chatArea.innerHTML="";WELCOME.style.display="";SUGGESTIONS.style.display="";
+    setMode("chat");promptBox.value="";promptBox.focus();
+  }
+  async function send(textOverride){
+    const text=(textOverride ?? promptBox.value).trim();
+    if(!text||busy)return;
+    promptBox.value="";promptBox.style.height="auto";WELCOME.style.display="none";SUGGESTIONS.style.display="none";
+    addMessage("user",text);busy=true;sendBtn.disabled=true;showTyping();
+    try{
+      if(imageMode){
+        const r=await fetch("/api/image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:text})});
+        const data=await r.json();if(!r.ok)throw new Error(data.error||"이미지 생성 실패");
+        $("#typing")?.remove();messages.push({role:"assistant",content:"요청하신 이미지를 만들었어요."});
+        const el=document.createElement("div");el.className="message assistant";el.innerHTML='<div class="msg-avatar">PQ</div><div class="bubble"><p>요청하신 이미지를 만들었어요.</p></div>';
+        const bubble=el.querySelector(".bubble"),img=document.createElement("img");img.className="image-result";img.src=data.image;img.alt="생성된 이미지";bubble.appendChild(img);
+        const a=document.createElement("a");a.className="download-link";a.href=data.image;a.download="pqai-image.png";a.textContent="이미지 저장";bubble.appendChild(a);chatArea.appendChild(el);
+      }else{
+        const apiMessages=[...messages].filter(m=>m.role==="user"||m.role==="assistant").slice(-24);
+        const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:text,messages:apiMessages,mode,webSearch:$("#webSearch").checked})});
+        const data=await r.json();if(!r.ok)throw new Error(data.error||"AI 응답 실패");
+        $("#typing")?.remove();addMessage("assistant",data.reply||data.text||"응답을 받지 못했습니다.");
+      }
+      persistCurrent();
+    }catch(err){
+      $("#typing")?.remove();addMessage("assistant",`오류가 발생했어요.\n\n${err.message}\n\n서버가 실행 중인지, .env에 API 키가 설정되어 있는지 확인해 주세요.`);
+    }finally{busy=false;sendBtn.disabled=false;promptBox.focus();}
+  }
+  sendBtn.addEventListener("click",()=>send());
+  promptBox.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}});
+  promptBox.addEventListener("input",()=>{promptBox.style.height="auto";promptBox.style.height=Math.min(promptBox.scrollHeight,170)+"px";});
+  $("#newChat").addEventListener("click",resetChat);
+  document.querySelectorAll(".nav-item[data-mode],.mode[data-mode]").forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode)));
+  $("#imageMode").addEventListener("click",()=>setMode("image"));
+  document.querySelectorAll(".suggestion").forEach(b=>b.addEventListener("click",()=>{setMode(b.dataset.mode);send(b.dataset.prompt);}));
+  renderHistory();activeId=newId();
+})();
+</script>
+</body>
+</html>
